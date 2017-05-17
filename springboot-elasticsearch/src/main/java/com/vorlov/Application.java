@@ -19,6 +19,7 @@ public class Application implements CommandLineRunner {
     @Autowired
     private ElasticsearchOperations es;
 
+
     @Autowired
     private BookService bookService;
 

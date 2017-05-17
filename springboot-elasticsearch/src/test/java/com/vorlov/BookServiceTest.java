@@ -1,26 +1,30 @@
 package com.vorlov;
 
+import com.vorlov.book.config.EsConfig;
 import com.vorlov.book.model.Book;
 import com.vorlov.book.service.BookService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.elasticsearch.index.query.QueryBuilders.regexpQuery;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@ContextConfiguration(classes = EsConfig.class)
 public class BookServiceTest {
 
     @Autowired
@@ -101,11 +105,38 @@ public class BookServiceTest {
     @Test
     public void testDelete() {
 
-        Book book = new Book("1001", "Elasticsearch Basics", "Rambabu Posa", "23-FEB-2017");
-        bookService.save(book);
+        Book book = new Book("Elasticsearch Basics", "Rambabu Posa", "23-FEB-2017");
+        book = bookService.save(book);
         bookService.delete(book);
         Book testBook = bookService.findOne(book.getId());
         assertNull(testBook);
     }
 
+    @Test
+    public void testFindByRegex(){
+        addPushkinBooks();
+
+//        final SearchQuery searchQuery = new NativeSearchQueryBuilder().withFilter(regexpQuery("title", ".*pokoy.*")).build();
+        final SearchQuery searchQuery = new NativeSearchQueryBuilder().withQuery(regexpQuery("title", ".*pokoy.*")).build();
+        final List<Book> books = esTemplate.queryForList(searchQuery, Book.class);
+
+        assertEquals(1, books.size());
+    }
+
+    private void addPushkinBooks() {
+        createBook("Arap Petra Velikogo", "Alexander Pushkin", "23-FEB-1828");
+        createBook("Povesti pokoynogo Ivana Petrovicha Belkina", "Alexander Pushkin", "23-FEB-1831");
+        createBook("Pikovaa dama", "Alexander Pushkin", "23-FEB-1834");
+        createBook("Kirjali", "Alexander Pushkin", "23-FEB-1834");
+        createBook("Istoria Pugachyova", "Alexander Pushkin", "23-FEB-1834");
+        createBook("Puteshestvie v Arzrum", "Alexander Pushkin", "23-FEB-1836");
+        createBook("Roslavlyov", "Alexander Pushkin", "23-FEB-1836");
+        createBook("Istoria sela Goryuhina", "Alexander Pushkin", "23-FEB-1837");
+        createBook("Egypetskie nochi", "Alexander Pushkin", "23-FEB-1837");
+        createBook("Dubrovsky", "Alexander Pushkin", "23-FEB-1841");
+    }
+
+    private void createBook(String title, String author, String releaseDate) {
+        bookService.save(new Book(title, author, releaseDate));
+    }
 }

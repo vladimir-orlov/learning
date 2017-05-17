@@ -3,6 +3,8 @@ package com.vorlov.book.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
+import java.time.LocalDate;
+
 @Document(indexName = "vorlov", type = "books")
 public class Book {
 
@@ -15,7 +17,16 @@ public class Book {
 
     private String releaseDate;
 
+    private LocalDate localDate;
+
     public Book() {
+    }
+
+    public Book(String title, String author, String releaseDate) {
+        this.title = title;
+        this.author = author;
+        this.releaseDate = releaseDate;
+        this.localDate = LocalDate.now();
     }
 
     public Book(String id, String title, String author, String releaseDate) {
@@ -23,6 +34,14 @@ public class Book {
         this.title = title;
         this.author = author;
         this.releaseDate = releaseDate;
+    }
+
+    public Book(String id, String title, String author, String releaseDate, LocalDate localDate) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.releaseDate = releaseDate;
+        this.localDate = localDate;
     }
 
     public String getId() {
@@ -55,6 +74,14 @@ public class Book {
 
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public LocalDate getLocalDate() {
+        return localDate;
+    }
+
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
     }
 
     @Override
